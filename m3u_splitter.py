@@ -140,7 +140,7 @@ def save_batches(batches, input_file_path, base_filename='playlist_batch'):
     input_name_without_ext = os.path.splitext(input_filename)[0]
     
     # Create a 'batches' folder inside the input file's directory
-    output_dir = os.path.join(input_dir, f"{input_name_without_ext}_batches")
+    output_dir = os.path.join(input_dir, f"{input_name_without_ext}_m3u_batches")
     os.makedirs(output_dir, exist_ok=True)
     logger.info(f"Created output directory: {output_dir}")
     

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
-import os
-import time
-import re
 import logging
+import os
+import re
+import time
 from urllib.parse import urlparse
+
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
+from spotipy.oauth2 import SpotifyOAuth
+
 
 # Configure logging
 def setup_logging(log_file='logs/spotify_playlist_adder.log'):
@@ -279,7 +281,7 @@ def main():
     
     parser = argparse.ArgumentParser(description='Add songs from M3U files to a Spotify playlist')
     parser.add_argument('--playlist-id', required=True, help='Spotify playlist ID to add songs to')
-    parser.add_argument('--m3u-file', help='Original M3U file path - will look for batches in {filename}_batches folder')
+    parser.add_argument('--m3u-file', help='Original M3U file path - will look for batches in {filename}_m3u_batches folder')
     parser.add_argument('--batch-dir', help='Directory containing batch M3U files (alternative to --m3u-file)')
     parser.add_argument('--batch-file', help='Single M3U batch file to process (alternative to --m3u-file or --batch-dir)')
     parser.add_argument('--failed-output', default='logs/failed_tracks.txt', help='File to save failed tracks to')
@@ -327,7 +329,7 @@ def main():
                 input_dir = os.path.dirname(os.path.abspath(args.m3u_file))
                 input_filename = os.path.basename(args.m3u_file)
                 input_name_without_ext = os.path.splitext(input_filename)[0]
-                batch_dir = os.path.join(input_dir, f"{input_name_without_ext}_batches")
+                batch_dir = os.path.join(input_dir, f"{input_name_without_ext}_m3u_batches")
                 logger.info(f"Using batch directory derived from M3U file: {batch_dir}")
             elif args.batch_dir:
                 # Use the specified batch directory
