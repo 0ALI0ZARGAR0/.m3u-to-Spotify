@@ -1,0 +1,7 @@
+.env
+m3u
+*.m3u
+.cache
+__pycache__
+*.log
+*.txt
