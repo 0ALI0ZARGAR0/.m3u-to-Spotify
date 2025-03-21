@@ -10,13 +10,14 @@ from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
 
 # Configure logging
-def setup_logging(log_file='spotify_playlist_adder.log'):
+def setup_logging(log_file='logs/spotify_playlist_adder.log'):
     """Set up logging to file and console without rotation or limits"""
     # Create logger
     logger = logging.getLogger('spotify_playlist_adder')
     logger.setLevel(logging.DEBUG)
     
     # Create file handler which logs all messages
+    os.makedirs('logs', exist_ok=True)
     file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
     file_handler.setLevel(logging.DEBUG)
     
@@ -138,7 +139,7 @@ def extract_search_query_from_song(song):
     # If we can't parse it, just use the filename as a search term
     return filename_without_ext
 
-def process_m3u_batch(sp, file_path, playlist_id, failed_output='failed_tracks.txt', rate_limit=100, skip_failures=True):
+def process_m3u_batch(sp, file_path, playlist_id, failed_output='logs/failed_tracks.txt', rate_limit=100, skip_failures=True):
     """
     Process a batch of songs from an M3U file and add them to a Spotify playlist.
     
@@ -281,15 +282,22 @@ def main():
     parser.add_argument('--m3u-file', help='Original M3U file path - will look for batches in {filename}_batches folder')
     parser.add_argument('--batch-dir', help='Directory containing batch M3U files (alternative to --m3u-file)')
     parser.add_argument('--batch-file', help='Single M3U batch file to process (alternative to --m3u-file or --batch-dir)')
-    parser.add_argument('--failed-output', default='failed_tracks.txt', help='File to save failed tracks to')
-    parser.add_argument('--failed-m3u', default='failed_tracks.m3u', help='M3U file to save failed tracks to')
-    parser.add_argument('--log-file', default='spotify_playlist_adder.log', help='Log file path')
+    parser.add_argument('--failed-output', default='logs/failed_tracks.txt', help='File to save failed tracks to')
+    parser.add_argument('--failed-m3u', default=None, help='M3U file to save failed tracks to')
+    parser.add_argument('--log-file', default='logs/spotify_playlist_adder.log', help='Log file path')
     
     args = parser.parse_args()
     
     # Set up logging with the specified log file
     global logger
     logger = setup_logging(args.log_file)
+    
+    # Set default failed M3U path if not provided
+    if args.failed_m3u is None:
+        if args.m3u_file:
+            args.failed_m3u = os.path.join(os.path.dirname(args.m3u_file), 'failed_tracks.m3u')
+        else:
+            args.failed_m3u = 'failed_tracks.m3u'
     
     # Clear the failed tracks file at the start
     with open(args.failed_output, 'w', encoding='utf-8') as f:

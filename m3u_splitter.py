@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-import logging
 import os
-
+import logging
 
 # Configure logging
 def setup_logging(log_file='m3u_splitter.log'):
@@ -12,7 +11,8 @@ def setup_logging(log_file='m3u_splitter.log'):
     logger.setLevel(logging.DEBUG)
     
     # Create file handler which logs all messages
-    file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
+    os.makedirs('logs', exist_ok=True)
+    file_handler = logging.FileHandler(f'logs/{log_file}', mode='a', encoding='utf-8')
     file_handler.setLevel(logging.DEBUG)
     
     # Create console handler with the same log level
