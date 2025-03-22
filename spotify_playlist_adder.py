@@ -225,9 +225,19 @@ def process_m3u_batch(sp, file_path, playlist_id, failed_output='logs/failed_tra
         for i in range(0, len(track_ids), 100):
             batch = track_ids[i:i+100]
             try:
-                sp.playlist_add_items(playlist_id, batch)
-                successful += len(batch)
-                logger.info(f"Added batch of {len(batch)} tracks to playlist")
+                # Retrieve current playlist tracks
+                current_tracks = sp.playlist_tracks(playlist_id)
+                current_track_ids = {item['track']['id'] for item in current_tracks['items']}
+                
+                # Filter out tracks that are already in the playlist
+                new_tracks = [track_id for track_id in batch if track_id not in current_track_ids]
+                
+                if new_tracks:
+                    sp.playlist_add_items(playlist_id, new_tracks)
+                    successful += len(new_tracks)
+                    logger.info(f"Added batch of {len(new_tracks)} new tracks to playlist")
+                else:
+                    logger.info("No new tracks to add to the playlist")
                 # Sleep to avoid rate limits
                 time.sleep(2)
             except Exception as e:
