@@ -10,6 +10,8 @@ This was a need of mine I came across and implemented on a weekend morning.
    ```
    pip install -r requirements.txt
    ```
+   
+   > 🚀 Shoutout: Try [uv](https://github.com/astral-sh/uv) for extremely fast installs — `uv pip install -r requirements.txt`
 
 2. Set up Spotify Developer credentials:
 
