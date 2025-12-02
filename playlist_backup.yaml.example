@@ -1,0 +1,23 @@
+# Default location for backup runs
+output_root: backups
+
+# Backup every playlist by default (options: all, selected)
+mode: all
+
+# Export format can be m3u, json, or both
+default_format: both
+
+# Include liked songs as a pseudo-playlist
+include_liked_songs: true
+
+# Optional: exclude playlists when mode=all. Entries can be IDs, URLs, or names.
+exclude_playlists:
+  # - Chill Mix
+  # - 37i9dQZF1DXcBWIGoYBM5M
+
+# Example structure when mode=selected
+selected_playlists:
+  # - name: Roadtrip
+  #   format: m3u
+  # - id: 37i9dQZF1DXcBWIGoYBM5M
+  #   format: both

@@ -4,5 +4,6 @@ m3u
 .cache
 __pycache__
 *.log
-*.txt
+logs/*.txt
 .DS_Store
+playlist_backup.yaml

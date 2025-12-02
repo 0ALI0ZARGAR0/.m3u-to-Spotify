@@ -60,6 +60,28 @@ To process just a single batch file:
 python spotify_playlist_adder.py --playlist-id YOUR_PLAYLIST_ID --batch-file batches/playlist_batch_1.m3u
 ```
 
+### Backup your Spotify playlists
+
+1. Copy the example config:
+
+   ```
+   cp playlist_backup.yaml.example playlist_backup.yaml
+   ```
+
+2. Edit `playlist_backup.yaml` to choose the output directory, whether you want to back up everything or a subset, and if liked songs should be included.
+
+3. Run the backup script:
+
+   ```
+   python spotify_playlist_backup.py --config playlist_backup.yaml
+   ```
+
+Backups are stored under your configured `output_root` using timestamped folders and include:
+
+- `metadata.json` + `tracks.json` with playlist details
+- `playlist.m3u` for compatibility with other players
+- `manifest.json` summarizing the run
+
 ## Notes
 
 - The script will attempt to match songs by artist and title when they're not Spotify URLs
