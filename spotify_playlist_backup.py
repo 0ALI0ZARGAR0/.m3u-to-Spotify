@@ -12,6 +12,7 @@ import spotipy
 import yaml
 from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyOAuth
+import requests
 
 
 def setup_logging(log_file: str = 'logs/spotify_playlist_backup.log') -> logging.Logger:
@@ -229,6 +230,18 @@ def write_m3u(tracks: List[Dict[str, Any]], destination: str) -> None:
         handle.write('\n'.join(lines) + '\n')
 
 
+def download_image(image_url: str, destination: str) -> Optional[str]:
+    try:
+        response = requests.get(image_url, timeout=30)
+        response.raise_for_status()
+        with open(destination, 'wb') as handle:
+            handle.write(response.content)
+        return destination
+    except Exception as exc:
+        logger.warning(f'Failed to download playlist image: {exc}')
+        return None
+
+
 def parse_format(value: Optional[str]) -> List[str]:
     if not value:
         value = 'both'
@@ -395,6 +408,15 @@ def backup_playlist(
 
     ensure_directory(playlist_dir)
 
+    image_path = None
+    if metadata['images']:
+        image_url = metadata['images'][0].get('url')
+        if image_url:
+            image_path = os.path.join(playlist_dir, 'cover_image.jpg')
+            saved = download_image(image_url, image_path)
+            if not saved:
+                image_path = None
+
     if 'json' in export_formats:
         write_metadata_files(playlist_dir, metadata, normalized_tracks)
 
@@ -407,6 +429,7 @@ def backup_playlist(
         'track_count': len(normalized_tracks),
         'directory': playlist_dir,
         'formats': export_formats,
+        'cover_image': os.path.basename(image_path) if image_path else None,
     }
 
 
@@ -446,6 +469,7 @@ def backup_liked_songs(
         'track_count': len(normalized_tracks),
         'directory': liked_dir,
         'formats': export_formats,
+        'cover_image': None,
     }
 
 

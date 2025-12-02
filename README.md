@@ -82,6 +82,7 @@ Backups are stored under your configured `output_root` using timestamped folders
 - `playlist.m3u` for compatibility with other players
 - `manifest.json` summarizing the run
 - `playlists_overview.json` listing every playlist discovered (owned, collaborative, or skipped)
+- `cover_image.jpg` when the playlist has artwork available
 
 ## Notes
 
