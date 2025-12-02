@@ -176,7 +176,7 @@ def main():
     global logger
     logger = setup_logging(args.log_file)
     
-    logger.info(f"Starting M3U Splitter")
+    logger.info("Starting M3U Splitter")
     logger.info(f"Parsing {args.m3u_file}...")
     songs = parse_m3u(args.m3u_file)
     logger.info(f"Found {len(songs)} songs")

@@ -3,21 +3,30 @@
 import logging
 import os
 import time
-from collections import defaultdict
 
 import spotipy
 from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyOAuth
 
+# Module-level logger so helper functions can log without reconfiguration
+logger = logging.getLogger('spotify_playlist_deduplicator')
+
 # Configure logging
 def setup_logging(log_file='logs/spotify_playlist_deduplicator.log'):
     """Set up logging to file and console without rotation or limits"""
-    # Create logger
-    logger = logging.getLogger('spotify_playlist_deduplicator')
+    global logger
+    
+    # Reset existing handlers to avoid duplicate logs if called multiple times
+    if logger.handlers:
+        for handler in list(logger.handlers):
+            logger.removeHandler(handler)
+            handler.close()
+    
     logger.setLevel(logging.DEBUG)
     
     # Create file handler which logs all messages
-    os.makedirs('logs', exist_ok=True)
+    log_dir = os.path.dirname(log_file) or '.'
+    os.makedirs(log_dir, exist_ok=True)
     file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
     file_handler.setLevel(logging.DEBUG)
     
@@ -193,14 +202,14 @@ def main():
     args = parser.parse_args()
     
     # Set up logging with the specified log file
-    logger = setup_logging(args.log_file)
+    setup_logging(args.log_file)
     
     # Extract playlist ID from URL if needed
     playlist_id = args.playlist_id
     if 'spotify.com/playlist/' in playlist_id:
         playlist_id = playlist_id.split('playlist/')[1].split('?')[0]
     
-    logger.info(f"Starting Spotify Playlist Deduplicator")
+    logger.info("Starting Spotify Playlist Deduplicator")
     logger.info(f"Target playlist ID: {playlist_id}")
     
     try:

@@ -312,7 +312,7 @@ def main():
             args.failed_m3u = 'failed_tracks.m3u'
     
     # Clear the failed tracks file at the start
-    with open(args.failed_output, 'w', encoding='utf-8') as f:
+    with open(args.failed_output, 'w', encoding='utf-8'):
         pass  # Just create/truncate the file
     
     try:
