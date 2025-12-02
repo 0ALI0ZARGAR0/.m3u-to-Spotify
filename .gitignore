@@ -5,3 +5,4 @@ m3u
 __pycache__
 *.log
 *.txt
+.DS_Store
