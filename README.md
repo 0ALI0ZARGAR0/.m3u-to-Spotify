@@ -68,7 +68,7 @@ python spotify_playlist_adder.py --playlist-id YOUR_PLAYLIST_ID --batch-file bat
    cp playlist_backup.yaml.example playlist_backup.yaml
    ```
 
-2. Edit `playlist_backup.yaml` to choose the output directory, whether you want to back up everything or a subset, and if liked songs should be included.
+2. Edit `playlist_backup.yaml` to choose the output directory, whether you want to back up everything or a subset (note: only playlists you own or collaborative playlists you contribute to can be backed up), and if liked songs should be included.
 
 3. Run the backup script:
 
@@ -81,6 +81,7 @@ Backups are stored under your configured `output_root` using timestamped folders
 - `metadata.json` + `tracks.json` with playlist details
 - `playlist.m3u` for compatibility with other players
 - `manifest.json` summarizing the run
+- `playlists_overview.json` listing every playlist discovered (owned, collaborative, or skipped)
 
 ## Notes
 

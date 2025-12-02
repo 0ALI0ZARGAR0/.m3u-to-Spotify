@@ -261,7 +261,18 @@ def resolve_identifier(entry: Any) -> Dict[str, Any]:
     return {}
 
 
-def determine_playlist_exports(config: Dict[str, Any], playlists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def user_can_backup_playlist(playlist: Dict[str, Any], current_user_id: Optional[str]) -> bool:
+    owner_id = (playlist.get('owner') or {}).get('id')
+    is_owner = current_user_id and owner_id == current_user_id
+    is_collaborative = bool(playlist.get('collaborative'))
+    return bool(is_owner or is_collaborative)
+
+
+def determine_playlist_exports(
+    config: Dict[str, Any],
+    playlists: List[Dict[str, Any]],
+    current_user_id: Optional[str],
+) -> List[Dict[str, Any]]:
     by_id = {playlist['id']: playlist for playlist in playlists}
     name_map: Dict[str, List[Dict[str, Any]]] = {}
     for playlist in playlists:
@@ -306,6 +317,13 @@ def determine_playlist_exports(config: Dict[str, Any], playlists: List[Dict[str,
         for playlist in playlists:
             if playlist['id'] in excluded_ids:
                 continue
+            if not user_can_backup_playlist(playlist, current_user_id):
+                logger.info(
+                    "Skipping playlist '%s' (%s) because user is neither owner nor collaborator",
+                    playlist.get('name', playlist['id']),
+                    playlist['id'],
+                )
+                continue
             exports.append(
                 {
                     'id': playlist['id'],
@@ -324,6 +342,13 @@ def determine_playlist_exports(config: Dict[str, Any], playlists: List[Dict[str,
                 entry_format = parse_format(default_format)
             playlist = find_playlist(details)
             if playlist:
+                if not user_can_backup_playlist(playlist, current_user_id):
+                    logger.info(
+                        "Skipping playlist '%s' (%s) - user is neither owner nor collaborator",
+                        playlist.get('name', playlist['id']),
+                        playlist['id'],
+                    )
+                    continue
                 exports.append(
                     {
                         'id': playlist['id'],
@@ -452,7 +477,8 @@ def main() -> None:
 
     user_profile = sp.current_user()
     playlists = fetch_all_playlists(sp)
-    planned_exports = determine_playlist_exports(config, playlists)
+    current_user_id = user_profile.get('id')
+    planned_exports = determine_playlist_exports(config, playlists, current_user_id)
 
     if not planned_exports and not config.get('include_liked_songs', True):
         logger.warning('No playlists to export and liked songs disabled; nothing to do')
@@ -477,6 +503,32 @@ def main() -> None:
         result = backup_liked_songs(sp, user_profile, liked_dir, parse_format(config['default_format']))
         export_records.append(result)
 
+    playlist_overview = []
+    backup_ids = {entry['id'] for entry in export_records}
+    for playlist in playlists:
+        owner = playlist.get('owner') or {}
+        can_backup = user_can_backup_playlist(playlist, current_user_id)
+        if playlist['id'] in backup_ids:
+            status = 'backed_up'
+        elif not can_backup:
+            status = 'skipped_no_access'
+        else:
+            status = 'skipped_by_config'
+
+        playlist_overview.append(
+            {
+                'id': playlist.get('id'),
+                'name': playlist.get('name'),
+                'owner_id': owner.get('id'),
+                'owner_name': owner.get('display_name'),
+                'collaborative': playlist.get('collaborative', False),
+                'status': status,
+            }
+        )
+
+    overview_path = os.path.join(root_dir, 'playlists_overview.json')
+    write_json(overview_path, playlist_overview)
+
     manifest = {
         'run_started_at': timestamp,
         'user': {
@@ -487,6 +539,8 @@ def main() -> None:
         'include_liked_songs': config.get('include_liked_songs', True),
         'output_root': config['output_root'],
         'backups_created': export_records,
+        'playlists_overview_file': 'playlists_overview.json',
+        'total_playlists': len(playlists),
     }
 
     create_manifest(os.path.join(root_dir, 'manifest.json'), manifest)
