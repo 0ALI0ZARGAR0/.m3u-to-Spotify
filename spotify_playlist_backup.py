@@ -473,6 +473,33 @@ def backup_liked_songs(
     }
 
 
+def save_user_profile(root_dir: str, user_profile: Dict[str, Any]) -> Optional[str]:
+    profile_dir = os.path.join(root_dir, 'user_profile')
+    ensure_directory(profile_dir)
+
+    profile_data = {
+        'id': user_profile.get('id'),
+        'display_name': user_profile.get('display_name'),
+        'email': user_profile.get('email'),
+        'followers': user_profile.get('followers', {}).get('total'),
+        'href': (user_profile.get('external_urls') or {}).get('spotify'),
+        'images': user_profile.get('images', []),
+    }
+
+    write_json(os.path.join(profile_dir, 'profile.json'), profile_data)
+
+    images = user_profile.get('images') or []
+    if images:
+        image_url = images[0].get('url')
+        if image_url:
+            destination = os.path.join(profile_dir, 'profile_image.jpg')
+            saved = download_image(image_url, destination)
+            if saved:
+                return os.path.relpath(saved, root_dir)
+
+    return None
+
+
 def create_manifest(path: str, summary: Dict[str, Any]) -> None:
     write_json(path, summary)
 
@@ -527,6 +554,8 @@ def main() -> None:
         result = backup_liked_songs(sp, user_profile, liked_dir, parse_format(config['default_format']))
         export_records.append(result)
 
+    profile_image_rel_path = save_user_profile(root_dir, user_profile)
+
     playlist_overview = []
     backup_ids = {entry['id'] for entry in export_records}
     for playlist in playlists:
@@ -565,6 +594,8 @@ def main() -> None:
         'backups_created': export_records,
         'playlists_overview_file': 'playlists_overview.json',
         'total_playlists': len(playlists),
+        'user_profile_dir': 'user_profile',
+        'user_profile_image': profile_image_rel_path,
     }
 
     create_manifest(os.path.join(root_dir, 'manifest.json'), manifest)

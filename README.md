@@ -83,6 +83,7 @@ Backups are stored under your configured `output_root` using timestamped folders
 - `manifest.json` summarizing the run
 - `playlists_overview.json` listing every playlist discovered (owned, collaborative, or skipped)
 - `cover_image.jpg` when the playlist has artwork available
+- `user_profile/profile.json` + `profile_image.jpg` capturing the account metadata
 
 ## Notes
 
