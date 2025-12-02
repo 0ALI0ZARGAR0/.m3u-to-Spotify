@@ -18,7 +18,7 @@ This was a need of mine I came across and implemented on a weekend morning.
    - Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/)
    - Create a new app
    - Note your Client ID and Client Secret
-   - Add `http://localhost:8888/callback` to the Redirect URIs in your app settings
+   - Add `http://127.0.0.1:8888/callback` to the Redirect URIs in your app settings (Spotify now rejects `localhost`)
 
 3. Create a `.env` file based on the `.env.example` template and fill in your Spotify credentials:
    ```
